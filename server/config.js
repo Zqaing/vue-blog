@@ -10,6 +10,6 @@ export const dbName = {
     database:'zz_blog'
 }
 
-export const base_API = 'api/'
+export const base_API = '/api'
 
 export const secret = 'zz_blog'

@@ -12,23 +12,21 @@ const sqlContent = fs.readFileSync(path.resolve(__dirname,'..','./sql/zz_blog.sq
 
 const init = mysql.createConnection(db)
 init.connect()
-init.query('CREATE DATABASE zz_blog',err=>{
+init.query('CREATE DATABASE zhen_blog',err=>{
     Object.assign(db,dbName)
-    //第二次连接数据库,这时候,数据库zz_blog已经创建成功了,这时候直接连接数据库
-    //然后执行sql文件
     pool = mysql.createPool(db)
     if(err){
-        console.log('zz_blog database created already')
+        console.log("数据库已存在")
     }else{
-        console.log('create zz_blog database succcess')
         query(sqlContent).then(res=>{
-            console.log('import sql is success')
+            console.log('数据库创建成功')
         }).catch(err=>{
-            console.log('import sql is error' + err)
+            console.log(err)
         })
     }
 })
 init.end()
+
 
 export default function query(sql, values){
     return new Promise((resolve,reject)=>{
