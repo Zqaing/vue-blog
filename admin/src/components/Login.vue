@@ -89,7 +89,7 @@
             this.$notify({
               type:'warn',
               group:'user',
-              title:'登录失败',
+              title:'验证失败',
               text:this.errors.items[0].msg
             })
           }
