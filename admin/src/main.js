@@ -14,8 +14,12 @@ import '@/assets/style'
 import VeeValidate from 'vee-validate'
 //引入一个消息提示的插件
 import Notifications from 'vue-notification'
+//加入权限判断
+import '@/permission'
+
 Vue.use(VeeValidate)
 Vue.use(Notifications)
+
 
 
 Vue.config.productionTip = false
