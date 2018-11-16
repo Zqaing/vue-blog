@@ -1,14 +1,13 @@
 <template>
   <div class="editor">
     <input type="text" class="title" id="title" v-model="title">
-    {{ id }}
     <div class="operate-bar">
       <section class="tag-container">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-liebiao"></use>
         </svg>
         <ul class="tags">
-          <li class="tag" v-for="(tag,index) in tags" :key="index">
+          <li class="tag" v-for="(tag,index) in getTags" :key="index">
             {{ tag }}
           </li>
         </ul>
@@ -31,7 +30,7 @@
   // 引入编辑器
   import 'simplemde/dist/simplemde.min.css'
   import SimpleMDE from 'simplemde'
-  import { mapState } from 'vuex'
+  import { mapState,mapGetters } from 'vuex'
 
   export default {
     name: "Editor",
@@ -43,6 +42,7 @@
     },
     computed:{
       ...mapState(['id','title','content','isPublished']),
+      ...mapGetters(['getTags'])
     },
     mounted() {
       this.tags = this.$store.getters.getTags
@@ -51,8 +51,14 @@
         spellChecker: false,
         toolbarTips: false
       });
-      // 将vuex里面的正在编辑的文章的香菇干信息输出到编辑器里面
-
+      // 将vuex里面的正在编辑的文章的相关信息输出到编辑器里面
+      this.simolemde.value(this.content)
+    },
+    //监控ID值得变化,如果一旦变化,
+    watch:{
+      id(newVal,oldVal){
+        this.simolemde.value(this.content)
+      }
     }
   }
 </script>
