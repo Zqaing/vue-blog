@@ -20,30 +20,27 @@
 </template>
 
 <script>
-  /**
-   * @author
-   * @file 顶部公用导航栏组件
-   * */
   import request from '@/utils/request'
-  import {removeToken} from "../../utils/auth"
+  import { removeToken } from "../../utils/auth"
 
   export default {
     data(){
-      return {
+      return{
 
       }
     },
     methods: {
-      logOut(){
+      logOut() {
         request({
-          url:'logout',
-          method:'get'
+          url: '/logout',
+          method: 'get'
         }).then(res=>{
-          if(res.success == true){
+          console.log(res)
+          if (res.success == true){
             this.$store.commit('SET_TOKEN','')
             removeToken()
-            location.reload(); //强制刷新一下当前页面,重新判断下是否具有权限
-        }
+            location.reload();// 强制刷新一下当前页面,重新判断下是否具备权限
+          }
         }).catch(err=>{
           console.log(err)
         })
@@ -53,7 +50,7 @@
 </script>
 
 <style type="text/scss" lang="scss" scoped>
-  /*记得引入全局变量的文件*/
+  /* 记得引入全局变量的文件 */
   @import '../../assets/style/variable';
   .head-nav {
     font-family: KaiShu, Arial, sans-serif;
@@ -90,4 +87,3 @@
     }
   }
 </style>
-

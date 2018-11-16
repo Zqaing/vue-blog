@@ -1,6 +1,7 @@
 //关于权限的一些方法
 import Cookies from 'js-cookie'
 const TokenKey = 'Admin-Token'
+
 export function getToken(){
   return Cookies.get(TokenKey)
 }

@@ -1,36 +1,55 @@
-//连接数据库
+// 首先链接mysql数据库
 
-//封装一个query方法,方便执行sql语句
+
+
+
 import mysql from 'mysql'
-import { db,dbName } from '../config'
+import {db, dbName} from '../config.js'
 import fs from 'fs'
 import path from 'path'
-let pool
-const sqlContent = fs.readFileSync(path.resolve(__dirname,'..','./sql/zz_blog.sql'),'utf-8')
-//第一次连接数据库的时候,没有指定数据库名称,这次连接的目的是能够创建一个zz_blog数据库
-//并且将数据库文件执行,执行完毕后zz_blog数据库就有对应的表和数据了
+// 需要创建一个数据库,并且能够将sql文件下的sql文件执行
+let pool;
+// 同步读取文件
+const sqlContent = fs.readFileSync(path.resolve(__dirname,'..','./sql/qq_blog.sql'),'utf-8')
 
+// 链接数据库,括号内的参数可以是一个对象或者是一个url字符串,用于指定该链接所用的各种选项
 const init = mysql.createConnection(db)
+// 使用connect方法建立链接
 init.connect()
-init.query('CREATE DATABASE zhen_blog',err=>{
+// 判断如果数据库存在了,则不需要执行下面的代码
+
+
+init.query('CREATE DATABASE qq_blog',err=>{
+    // .assign 方法会将两个对象进行合并,如果两者有冲突的话,后者会覆盖前者.
     Object.assign(db,dbName)
+    // 第二次链接数据库,这时候,数据库xk_blog已经创建成功,这时候直接链接xk_blog数据库
+    // 然后执行sql文件夹下的xk_blog.sql文件,对应表和测试数据就已经存在数据库里面了
     pool = mysql.createPool(db)
-    if(err){
-        console.log("数据库已存在")
+    if (err){
+        console.log('qq_blog database created already')
     }else{
+        console.log('create qq_blog Database')
         query(sqlContent).then(res=>{
-            console.log('数据库创建成功')
-        }).catch(err=>{
-            console.log(err)
+            console.log('import sql is success')
+        }).catch((err)=>{
+            console.log('import sql is error')
         })
     }
 })
+
+
+
+// 关闭链接(end \ destory)
+// 两种方法的区别:
+// 1. end方法可以使用一个参数,指定关闭操作结束时的回调函数,关闭之前会将之前所有的查询操作执行完毕.
+// 2. destory没有参数,会直接关闭链接
 init.end()
 
 
-export default function query(sql, values){
+// 封装一个query方法,方便我们进行sql语句的执行
+export default function query (sql,values){
     return new Promise((resolve,reject)=>{
-        pool.getConnection(function(err,connection){
+        pool.getConnection((err,connection)=>{
             if(err){
                 reject(err);
             }else{
