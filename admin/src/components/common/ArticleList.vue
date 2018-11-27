@@ -1,82 +1,210 @@
 <template>
-  <div>
-    <ul class="list">
-      <li class="article" :class="{active: activeIndex === index,published:isPublished === 1}" v-for="{title,createTime,isPublished,isChosen},index in articleList " @click="select(index)">
-        <header>{{ title }}</header>
-        <p>{{ createTime }}</p>
-      </li>
-    </ul>
-    {{ id }}
-    {{ title }}
-    {{ tags }}
-    {{ content }}
-    {{ isPublished }}
-  </div>
+    <div>
+      <ul class="list">
+        <li class="article"  :class="{active: activeIndex === index, published: isPublished === 1}" v-for="{title,createTime,isPublished,isChosen},index in articleList" @click="select(index)" v-if="isChosen">
+          <header>{{title}}</header>
+          <p>{{createTime}}</p>
+        </li>
+      </ul>
+    </div>
 </template>
 
 <script>
-    import request from '@/utils/request'
-    import moment from 'moment'
-    import { mapState,mapMutations } from 'vuex'
-    export default {
-      name: "ArticleList",
-      data(){
-        return {
-          articleList: [],
-          activeIndex: -1
+  import request from '@/utils/request'
+  import moment from 'moment'
+  import { mapState,mapMutations } from 'vuex'
+  export default {
+    name: "ArticleList",
+    data(){
+      return {
+        articleList:[],
+        activeIndex:-1,
+      }
+    },
+    //把全局的vuex里面的state和mutations放到计算属性中...
+    computed:{
+      ...mapState(['id','title','tags','content','isPublished','toggleDelete']),
+    },
+    //当该组件创建的时候自动执行里面的请求
+    created(){
+      request({
+        method:'get',
+        url:'/art'
+      }).then(res=>{
+        console.log(res)
+        for(let article of res){
+          article.createTime = moment(article.createTime).format('YYYY年-MM月-DD日 HH:mm:ss')
+          article.isChosen = true
         }
-      },
-      // 引入全局vuex
-      // 把全局的vuex里面的state和mutations放到计算属性中....
-      computed: {
-        ...mapState(['id','title','tags','content','isPublished']),
-        // ...mapMutations(['SET_CURRENT_ARTICLE'])
-        // ...mapActions([''])
-      },
-      // 当该组件创建的时候自动执行里面的请求
-      created(){
+        this.articleList.push(...res)
+        //如果查询出文章，则将第一篇文章作为正在编辑的文章
+        if(this.articleList.length !== 0){
+          this.SET_CURRENT_ARTICLE(this.articleList[0])
+          this.activeIndex = 0;
+        }
+      }).catch(err=>{
+        console.log(err)
+      })
+    },
+    methods:{
+      updateList(updateId){
         request({
-          method: 'get',
-          url: '/art'
+          method:"get",
+          url:`/articles/${updateId}`
         }).then(res=>{
-          for (let acticle of res){
-            acticle.createTime = moment(acticle.createTime).format('YYYY年-MM月-DD日 HH:mm:ss')
-            acticle.isChosen = true
-          }
-          this.articleList.push(...res)
+          const article = res[0]
+          article.createTime = moment(article.createTime).format('YYYY年-MM月-DD日 HH:mm:ss')
+          article.isChosen = true
+          this.articleList.unshift(article)
+          //如果发布了新文章的话，当前被选中的文章下标自动 + 1
+          this.activeIndex ++
         }).catch(err=>{
-          console.log(err)
+          console.log(err);
         })
       },
-      methods: {
-        updateList(updateId){
-          request({
-            method: 'get',
-            url: `/articles/${updateId}`
-          }).then(res=>{
-            const article = res[0]
-            article.createTime = moment(article.createTime).format('YYYY年-MM月-DD日 HH:mm:ss')
+      //标签相对应文章的显示与不显示
+      updateListByTags(chosenTags){
+        if(chosenTags.length === 0){
+          for(let article of this.articleList){
             article.isChosen = true
-            this.articleList.unshift(article)
-            //如果发布了新文章的话，当前被选中的文章下标自动 + 1
-            this.activeIndex ++
-          }).catch(err=>{
-            console.log(err)
+          }
+        }else{
+          for(let article of this.articleList){
+            let flag = false
+            for(let tag of chosenTags){
+              if(article.tags.indexOf(tag) !== -1){
+                flag = true
+              }
+            }
+            if(flag){
+              article.isChosen = true
+            }else{
+              article.isChosen = false
+            }
+          }
+          for(let [index,article] of this.articleList.entries()){
+            if(article.isChosen){
+              this.activeIndex = index
+              this.SET_CURRENT_ARTICLE(article,this.updateList[this.activeIndex])
+              break
+            }
+          }
+        }
+      },
+      //删除标签
+      deleteArticleTag(tag,i){
+        for(let article of this.articleList){
+          if(article.tags.length){
+            const tags = article.tags.split(',')
+            const index = tags.indexOf(tag)
+            if(index !== -1){
+              if(tags.length === 1 && article.isPublished === 1){
+                alert('已发布的文章请至少保持一个tag!!!')
+              }else{
+                tags.splice(index,1)
+                article.tags = tags.join(',')
+                request({
+                  url:`/deletetetag/${article.id}`,
+                  method:'post',
+                  data:{
+                    tag:article.tags
+                  }
+                }).then(res=>{
+                  alert('删除成功')
+                }).catch(err=>{
+                  console.log(err)
+                })
+              }
+            }
+          }
+        }
+      },
+      updateTag(oldVal,newVal,chosenTags){
+        for(let [i,article] of this.articleList.entries()){
+          //文章标签存在
+          if(article.tags.length){
+            const tags = article.tags.split(',')
+            const index =  tags.indexOf(oldVal)
+            if(index !== -1){
+              const newIndex = tags.indexOf(newVal)
+              //判断新值是否在该文章存在
+              if(newIndex === -1){
+                tags[index] = newVal
+                article.tags = tags.join(',')
+                request({
+                  url:`/updatetag/${article.id}`,
+                  method:'post',
+                  data:{
+                    tag:article.tags
+                  }
+                }).catch(err=>{
+                  console.log(err)
+                })
+              }else{
+                this.deleteArticleTag(oldVal,i)
+              }
+              this.updateListByTags(chosenTags)
+            }
+          }
+         // console.log(index)
+        }
+      },
+      select(index){
+        this.activeIndex = index
+        //当你在选择文章的时候，当前被选中的文章扔到全局状态管理里面
+        this.SET_CURRENT_ARTICLE(this.articleList[index])
+      },
+      ...mapMutations(['SET_CURRENT_ARTICLE'])
+    },
+    //监听vuex数据的变化，如果发生变化，更新articleList数据
+    watch:{
+      title(val){
+        if(this.articleList.length !== 0){
+          this.articleList[this.activeIndex].title = val
+        }
+      },
+      tags(val){
+        if(this.articleList.length !== 0){
+          this.articleList[this.activeIndex].tags = val
+        }
+      },
+      content(val){
+        if(this.articleList.length !== 0){
+          this.articleList[this.activeIndex].content = val
+        }
+      },
+      isPublished(val){
+        if(this.articleList.length !== 0){
+          this.articleList[this.activeIndex].isPublished = val
+        }
+      },
+      toggleDelete(val){
+        //如果这个值有变化，从false变为true,说明当前文章是需要删除的.
+        this.articleList.splice(this.activeIndex,1)
+        if(this.activeIndex === this.articleList.length){
+          this.activeIndex --
+        }
+        if(this.articleList.length !== 0){
+          this.SET_CURRENT_ARTICLE(this.articleList[this.activeIndex])
+        }else{
+          this.SET_CURRENT_ARTICLE({
+            id:'',
+            title:'',
+            tags:'',
+            content:'',
+            isPublished:''
           })
-        },
-        select(index){
-          this.activeIndex = index
-          // 当你在选择文章的时候,当前被选中的文章扔到全局状态管理里面
-          this.SET_CURRENT_ARTICLE(this.articleList[index])
-        },
-        ...mapMutations(['SET_CURRENT_ARTICLE'])
+        }
       }
     }
+  }
 </script>
-
-<style type="text/scss" lang="scss" scoped>
-  /* 记得引入全局变量的文件 */
+<style type="text/scss"  lang="scss" scoped>
+  /*记得引入全局变量的文件*/
   @import '../../assets/style/variable';
+  .list{
+    padding: 0;
+  }
   .article {
   @include flex($flow: column wrap, $align: flex-start);
     padding: 0.2em 0.5em;
@@ -102,13 +230,10 @@
      margin-bottom: 0;
    }
   }
-
   .active {
     border: 1px solid $base;
   }
-
   .published {
     border-right: 4px solid $base;
   }
-
 </style>

@@ -1,15 +1,15 @@
 <template>
   <nav class="head-nav">
     <div class="logo-container">
-      <img src="../../assets/image/logo.png" alt="" class="logo">
+      <img src="@/assets/image/logo.png" alt="" class="logo">
     </div>
     <div class="content-container">
       <section>
         <h4 class="title">
-          无火的余灰
+          zqaing博客系统
         </h4>
       </section>
-      <a class="log-out" @click="logOut">
+      <a class="log-out" @click="logout">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-tuichu"></use>
         </svg>
@@ -21,28 +21,26 @@
 
 <script>
   import request from '@/utils/request'
-  import { removeToken } from "../../utils/auth"
-
+  import { removeToken } from "@/utils/auth"
   export default {
     data(){
-      return{
+      return {
 
       }
     },
-    methods: {
-      logOut() {
+    methods:{
+      logout(){
         request({
-          url: '/logout',
-          method: 'get'
+          url:'/logout',
+          method:'get'
         }).then(res=>{
-          console.log(res)
-          if (res.success == true){
+          if(res.success == true){
             this.$store.commit('SET_TOKEN','')
             removeToken()
-            location.reload();// 强制刷新一下当前页面,重新判断下是否具备权限
+            location.reload();//强制刷新一下当前页面，重新判断下是否具备权限.
           }
         }).catch(err=>{
-          console.log(err)
+          console.log(err);
         })
       }
     }
@@ -50,7 +48,7 @@
 </script>
 
 <style type="text/scss" lang="scss" scoped>
-  /* 记得引入全局变量的文件 */
+  /*记得引入全局变量的文件*/
   @import '../../assets/style/variable';
   .head-nav {
     font-family: KaiShu, Arial, sans-serif;
@@ -74,7 +72,6 @@
         color: $word;
       }
     }
-
     h4 {
       @include flex;
       margin: 0;
@@ -87,3 +84,4 @@
     }
   }
 </style>
+

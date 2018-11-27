@@ -5,7 +5,7 @@ import Vue from 'vue'
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: "http://localhost:3000/api", // api 的 base_url
+  baseURL: "http://localhost:4000/api", // api 的 base_url
   timeout: 5000 // 请求超时时间
 })
 // request拦截器
@@ -28,22 +28,18 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     //这里面可以设置自定义的返回错误
-    if (res.code == 40001){
-      // token已过期的状态码
-      // this.$notify({
-      //   type: 'error',
-      //   title: 'TOKEN',
-      //   text: '已过期,请重新登录......'
-      // })
-      alert('token过期了')
-      removeToken();
+    if(res.code === 40001){
+      //token已过期的状态码
+      alert('token已经过期,请重新登录！！！！');
+      removeToken()
       store.commit('SET_TOKEN','')
       location.reload()
+    }else{
+      return response.data
     }
-    return response.data
   },
   error => {
-    // 服务器爆出来的所有错误,都会被前端你这个位置接收到,这个位置会打印这些错误信息,方便进行调试
+    //服务器报出来的所有的错误，都会被前端接收到这个位置，这个位置会打印这些错误信息，方便进行调试....
     console.log('err' + error) // for debug
     return Promise.reject(error)
   }

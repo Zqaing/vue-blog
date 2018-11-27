@@ -1,18 +1,18 @@
 <template>
   <aside class="side-nav">
-    <router-link to="/lists" class="link">
+    <router-link to="/list" class="link">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-liebiao"></use>
       </svg>
       <p class="descript">列表</p>
     </router-link>
-    <router-link to="/tags" class="link">
+    <router-link to="/tag" class="link">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-tag"></use>
       </svg>
       <p class="descript">标签</p>
     </router-link>
-    <router-link to="/readinglists" class="link">
+    <router-link to="/readinglist" class="link">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-yuedu"></use>
       </svg>
@@ -28,15 +28,13 @@
 </template>
 
 <script>
-  /**
-   * @author
-   * @file 左侧公用导航栏组件
-   * */
-  export default {}
+  export default {
+
+  }
 </script>
 
 <style type="text/scss" lang="scss" scoped>
-  /* 记得引入全局变量的文件 */
+  /*记得引入全局变量的文件*/
   @import '../../assets/style/variable';
   .side-nav {
     float: left;
@@ -59,13 +57,12 @@
     .descript {
       color: $special;
       font-size: 1rem;
-      margin: 0;
+      margin: 0px;
+      line-height:30px;
     }
-
     &:hover {
       border-left: 2px solid $base;
     }
-
     &:hover > .icon {
       fill: $base;
     }
@@ -73,7 +70,6 @@
       color: $base;
     }
   }
-
   .router-link-active {
     border-left: 2px solid $base;
     .icon {

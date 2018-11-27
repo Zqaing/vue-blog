@@ -6,11 +6,11 @@ export const db = {
     multipleStatements: true //必须加上这句话，不然的话就无法执行多条sql语句
 }
 export const dbName = {
-    database:'qq_blog'
+    database:'zz_blog'
 }
 export const base_API = '/api'
 
-export const secret = 'qq_blog'
+export const secret = 'zz_blog'
 
 
 
